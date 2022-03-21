@@ -22,7 +22,7 @@
   "homepage": "https://github.com/smarkets/react-native-paypal#readme",
   "repository": {
     "type": "git",
-    "url": "git@github.com:smarkets/react-native-paypal.git"
+    "url": "git@github.com:prettylittlething/react-native-paypal.git"
   },
   "peerDependencies": {
     "react-native": ">=0.41.2"

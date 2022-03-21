@@ -1,6 +1,8 @@
 
 package com.smarkets.paypal;
 
+import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
+
 import android.app.Activity;
 import android.content.Intent;
 
@@ -17,7 +19,6 @@ import com.braintreepayments.api.interfaces.PaymentMethodNonceCreatedListener;
 import com.braintreepayments.api.models.PayPalAccountNonce;
 import com.braintreepayments.api.models.PayPalRequest;
 import com.braintreepayments.api.models.PaymentMethodNonce;
-import com.braintreepayments.api.models.PostalAddress;
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -46,7 +47,12 @@ public class RNPaypalModule extends ReactContextBaseJavaModule implements Activi
       String token,
       ReadableMap options,
       Promise promise) {
+
     this.promise = promise;
+
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
     BraintreeFragment braintreeFragment = null;
     try {
       braintreeFragment = initializeBraintreeFragment(token);
@@ -83,22 +89,14 @@ public class RNPaypalModule extends ReactContextBaseJavaModule implements Activi
     }
 
     PayPal.requestOneTimePayment(braintreeFragment, request);
-  }
 
-  protected WritableMap postalAddressToMap(PostalAddress address) {
-    WritableMap result = Arguments.createMap();
-    result.putString("recipientName", address.getRecipientName());
-    result.putString("streetAddress", address.getStreetAddress());
-    result.putString("extendedAddress", address.getExtendedAddress());
-    result.putString("locality", address.getLocality());
-    result.putString("countryCodeAlpha2", address.getCountryCodeAlpha2());
-    result.putString("postalCode", address.getPostalCode());
-    result.putString("region", address.getRegion());
-    return result;
+      }
+    });
   }
 
   protected BraintreeFragment initializeBraintreeFragment(
-      String token) throws InvalidArgumentException {
+      final String token) throws InvalidArgumentException {
+
     FragmentActivity activity = (FragmentActivity) getCurrentActivity();
 
     if (activity == null) {
@@ -126,8 +124,6 @@ public class RNPaypalModule extends ReactContextBaseJavaModule implements Activi
           result.putString("firstName", payPalAccountNonce.getFirstName());
           result.putString("lastName", payPalAccountNonce.getLastName());
           result.putString("phone", payPalAccountNonce.getPhone());
-          result.putMap("billingAddress", postalAddressToMap(payPalAccountNonce.getBillingAddress()));
-          result.putMap("shippingAddress", postalAddressToMap(payPalAccountNonce.getShippingAddress()));
         }
 
         promise.resolve(result);
@@ -152,7 +148,11 @@ public class RNPaypalModule extends ReactContextBaseJavaModule implements Activi
           ReadableMap options,
           Promise promise
   ) {
+
     this.promise = promise;
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
     BraintreeFragment braintreeFragment = null;
 
     try {
@@ -173,6 +173,9 @@ public class RNPaypalModule extends ReactContextBaseJavaModule implements Activi
       request.localeCode(options.getString("localeCode"));
 
     PayPal.requestBillingAgreement(braintreeFragment, request);
+
+      }
+    });
   }
 
   @ReactMethod
@@ -180,7 +183,12 @@ public class RNPaypalModule extends ReactContextBaseJavaModule implements Activi
           final String token,
           final Promise promise
   ) {
+
     this.promise = promise;
+
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
     BraintreeFragment braintreeFragment = null;
 
     try {
@@ -198,6 +206,10 @@ public class RNPaypalModule extends ReactContextBaseJavaModule implements Activi
         promise.resolve(result);
       }
     });
+
+      }
+    });
+
   }
 
   @Override
