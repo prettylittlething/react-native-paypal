@@ -9,7 +9,7 @@
 #import "BraintreePayPal.h"
 #import "BTDataCollector.h"
 
-@interface RNPaypal : UIViewController <RCTBridgeModule, BTAppSwitchDelegate, BTViewControllerPresentingDelegate, BTDataCollectorDelegate>
+@interface RNPaypal : UIViewController <RCTBridgeModule, BTViewControllerPresentingDelegate>
 
 + (instancetype)sharedInstance;
 
