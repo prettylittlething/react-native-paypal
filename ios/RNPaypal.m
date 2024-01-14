@@ -38,10 +38,11 @@ RCT_EXPORT_METHOD(
         }
 
         BTPayPalDriver *payPalDriver = [[BTPayPalDriver alloc] initWithAPIClient:braintreeClient];
-        payPalDriver.viewControllerPresentingDelegate = self;
-        payPalDriver.appSwitchDelegate = self;
+//        payPalDriver.viewControllerPresentingDelegate = self;
+//        payPalDriver.appSwitchDelegate = self;
 
-        BTPayPalRequest *request= [[BTPayPalRequest alloc] initWithAmount:options[@"amount"]];
+//        BTPayPalRequest *request= [[BTPayPalRequest alloc] initWithAmount:options[@"amount"]];
+      BTPayPalCheckoutRequest *request= [[BTPayPalCheckoutRequest alloc] initWithAmount:options[@"amount"]];
         NSString* currency = options[@"currency"];
         if (currency) request.currencyCode = currency;
         NSString* displayName = options[@"displayName"];
@@ -64,7 +65,7 @@ RCT_EXPORT_METHOD(
             if (tokenizedPayPalAccount) {
                 NSDictionary* result = @{
                     @"nonce" : (tokenizedPayPalAccount.nonce ?: [NSNull null]),
-                    @"payerId" : (tokenizedPayPalAccount.payerId ?: [NSNull null]),
+                    @"payerId" : (tokenizedPayPalAccount.payerID ?: [NSNull null]),
                     @"email" : (tokenizedPayPalAccount.email ?: [NSNull null]),
                     @"firstName" : (tokenizedPayPalAccount.firstName ?: [NSNull null]),
                     @"lastName" : (tokenizedPayPalAccount.lastName ?: [NSNull null]),
@@ -115,13 +116,13 @@ RCT_EXPORT_METHOD(
             return;
         }
 
+
         BTDataCollector *dataCollector = [[BTDataCollector alloc] initWithAPIClient:braintreeClient];
-        dataCollector.delegate = self;
-        [dataCollector collectCardFraudData:^(NSString * _Nonnull deviceData) {
-            NSDictionary* result = @{
-                @"deviceData" : deviceData,
-            };
-            resolve(result);
+        [dataCollector collectDeviceData:^(NSString * _Nonnull deviceData) {
+          NSDictionary* result = @{
+            @"deviceData" : deviceData,
+          };
+          resolve(result);
         }];
     });
 }
@@ -134,6 +135,7 @@ RCT_EXPORT_METHOD(
     resolve:(RCTPromiseResolveBlock)resolve
     reject:(RCTPromiseRejectBlock)reject)
 {
+
     dispatch_async(dispatch_get_main_queue(), ^{
         BTAPIClient* braintreeClient = [[BTAPIClient alloc] initWithAuthorization:clientToken];
         if (braintreeClient == nil) {
@@ -148,55 +150,54 @@ RCT_EXPORT_METHOD(
             return;
         }
 
-        BTPayPalDriver *payPalDriver = [[BTPayPalDriver alloc] initWithAPIClient:braintreeClient];
-        payPalDriver.viewControllerPresentingDelegate = self;
-        payPalDriver.appSwitchDelegate = self;
+//        BTPayPalDriver *payPalDriver = [[BTPayPalDriver alloc] initWithAPIClient:braintreeClient];
+//
+//        BTPayPalVaultRequest *request = [[BTPayPalVaultRequest alloc] init];//initWithAmount:options[@"billingAgreementDescription"]];
 
-        BTPayPalRequest *request = [[BTPayPalRequest alloc] initWithAmount:options[@"billingAgreementDescription"]];
-        NSString* currency = options[@"currency"];
-        if (currency) request.currencyCode = currency;
-        NSString* localeCode = options[@"localeCode"];
-        if (localeCode) request.localeCode = localeCode;
-
-        [payPalDriver requestBillingAgreement:request completion:^(BTPayPalAccountNonce * _Nullable tokenizedPayPalAccount, NSError * _Nullable error) {
-            if (tokenizedPayPalAccount) {
-                NSDictionary* result = @{
-                    @"nonce" : (tokenizedPayPalAccount.nonce ?: [NSNull null]),
-                    @"payerId" : (tokenizedPayPalAccount.payerId ?: [NSNull null]),
-                    @"email" : (tokenizedPayPalAccount.email ?: [NSNull null]),
-                    @"firstName" : (tokenizedPayPalAccount.firstName ?: [NSNull null]),
-                    @"lastName" : (tokenizedPayPalAccount.lastName ?: [NSNull null]),
-                    @"phone" : (tokenizedPayPalAccount.phone ?: [NSNull null]),
-                    @"billingAddress": @{
-                        @"recipientName" : (tokenizedPayPalAccount.billingAddress.recipientName ?: [NSNull null]),
-                        @"streetAddress" : (tokenizedPayPalAccount.billingAddress.streetAddress ?: [NSNull null]),
-                        @"extendedAddress" : (tokenizedPayPalAccount.billingAddress.extendedAddress ?: [NSNull null]),
-                        @"locality" : (tokenizedPayPalAccount.billingAddress.locality ?: [NSNull null]),
-                        @"countryCodeAlpha2" : (tokenizedPayPalAccount.billingAddress.countryCodeAlpha2 ?: [NSNull null]),
-                        @"postalCode" : (tokenizedPayPalAccount.billingAddress.postalCode ?: [NSNull null]),
-                        @"region" : (tokenizedPayPalAccount.billingAddress.region ?: [NSNull null]),
-                    },
-                    @"shippingAddress": @{
-                        @"recipientName" : (tokenizedPayPalAccount.shippingAddress.recipientName ?: [NSNull null]),
-                        @"streetAddress" : (tokenizedPayPalAccount.shippingAddress.streetAddress ?: [NSNull null]),
-                        @"extendedAddress" : (tokenizedPayPalAccount.shippingAddress.extendedAddress ?: [NSNull null]),
-                        @"locality" : (tokenizedPayPalAccount.shippingAddress.locality ?: [NSNull null]),
-                        @"countryCodeAlpha2" : (tokenizedPayPalAccount.shippingAddress.countryCodeAlpha2 ?: [NSNull null]),
-                        @"postalCode" : (tokenizedPayPalAccount.shippingAddress.postalCode ?: [NSNull null]),
-                        @"region" : (tokenizedPayPalAccount.shippingAddress.region ?: [NSNull null]),
-                    },
-                };
-
-                resolve(result);
-                return;
-            } else if (error) {
-                reject(@"request_billing_agreement_error", @"Error requesting billing agreement", error);
-                return;
-            } else {
-                NSError* e = [NSError errorWithDomain:@"RNPayPal" code:2 userInfo:nil];
-                reject(@"user_cancellation", @"User cancelled billing agreement request", e);
-            }
-        }];
+//        NSString* currency = options[@"currency"];
+//        if (currency) request.currencyCode = currency;
+//        NSString* localeCode = options[@"localeCode"];
+//        if (localeCode) request.localeCode = localeCode;
+//
+//        [payPalDriver requestBillingAgreement:request completion:^(BTPayPalAccountNonce * _Nullable tokenizedPayPalAccount, NSError * _Nullable error) {
+//            if (tokenizedPayPalAccount) {
+//                NSDictionary* result = @{
+//                    @"nonce" : (tokenizedPayPalAccount.nonce ?: [NSNull null]),
+//                    @"payerId" : (tokenizedPayPalAccount.payerId ?: [NSNull null]),
+//                    @"email" : (tokenizedPayPalAccount.email ?: [NSNull null]),
+//                    @"firstName" : (tokenizedPayPalAccount.firstName ?: [NSNull null]),
+//                    @"lastName" : (tokenizedPayPalAccount.lastName ?: [NSNull null]),
+//                    @"phone" : (tokenizedPayPalAccount.phone ?: [NSNull null]),
+//                    @"billingAddress": @{
+//                        @"recipientName" : (tokenizedPayPalAccount.billingAddress.recipientName ?: [NSNull null]),
+//                        @"streetAddress" : (tokenizedPayPalAccount.billingAddress.streetAddress ?: [NSNull null]),
+//                        @"extendedAddress" : (tokenizedPayPalAccount.billingAddress.extendedAddress ?: [NSNull null]),
+//                        @"locality" : (tokenizedPayPalAccount.billingAddress.locality ?: [NSNull null]),
+//                        @"countryCodeAlpha2" : (tokenizedPayPalAccount.billingAddress.countryCodeAlpha2 ?: [NSNull null]),
+//                        @"postalCode" : (tokenizedPayPalAccount.billingAddress.postalCode ?: [NSNull null]),
+//                        @"region" : (tokenizedPayPalAccount.billingAddress.region ?: [NSNull null]),
+//                    },
+//                    @"shippingAddress": @{
+//                        @"recipientName" : (tokenizedPayPalAccount.shippingAddress.recipientName ?: [NSNull null]),
+//                        @"streetAddress" : (tokenizedPayPalAccount.shippingAddress.streetAddress ?: [NSNull null]),
+//                        @"extendedAddress" : (tokenizedPayPalAccount.shippingAddress.extendedAddress ?: [NSNull null]),
+//                        @"locality" : (tokenizedPayPalAccount.shippingAddress.locality ?: [NSNull null]),
+//                        @"countryCodeAlpha2" : (tokenizedPayPalAccount.shippingAddress.countryCodeAlpha2 ?: [NSNull null]),
+//                        @"postalCode" : (tokenizedPayPalAccount.shippingAddress.postalCode ?: [NSNull null]),
+//                        @"region" : (tokenizedPayPalAccount.shippingAddress.region ?: [NSNull null]),
+//                    },
+//                };
+//
+//                resolve(result);
+//                return;
+//            } else if (error) {
+//                reject(@"request_billing_agreement_error", @"Error requesting billing agreement", error);
+//                return;
+//            } else {
+//                NSError* e = [NSError errorWithDomain:@"RNPayPal" code:2 userInfo:nil];
+//                reject(@"user_cancellation", @"User cancelled billing agreement request", e);
+//            }
+//        }];
     });
 }
 
@@ -207,7 +208,7 @@ RCT_EXPORT_METHOD(
     annotation:(id)annotation
 {
     if ([url.scheme localizedCaseInsensitiveCompare:URLScheme] == NSOrderedSame) {
-        return [BTAppSwitch handleOpenURL:url sourceApplication:sourceApplication];
+      return [BTAppContextSwitcher handleOpenURL:url];
     }
     return NO;
 }
@@ -217,7 +218,7 @@ RCT_EXPORT_METHOD(
     options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
     if ([url.scheme localizedCaseInsensitiveCompare:URLScheme] == NSOrderedSame) {
-        return [BTAppSwitch handleOpenURL:url options:options];
+      return [BTAppContextSwitcher handleOpenURL:url];
     }
     return NO;
 }
@@ -226,7 +227,8 @@ RCT_EXPORT_METHOD(
     NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     NSString *urlscheme = [NSString stringWithFormat:@"%@.payments", bundleIdentifier];
     URLScheme = urlscheme;
-    [BTAppSwitch setReturnURLScheme:urlscheme];
+
+    [BTAppContextSwitcher setReturnURLScheme:urlscheme];
 }
 
 - (void)paymentDriver:(__unused id)driver requestsPresentationOfViewController:(UIViewController *)viewController {
