@@ -38,11 +38,8 @@ RCT_EXPORT_METHOD(
         }
 
         BTPayPalDriver *payPalDriver = [[BTPayPalDriver alloc] initWithAPIClient:braintreeClient];
-//        payPalDriver.viewControllerPresentingDelegate = self;
-//        payPalDriver.appSwitchDelegate = self;
 
-//        BTPayPalRequest *request= [[BTPayPalRequest alloc] initWithAmount:options[@"amount"]];
-      BTPayPalCheckoutRequest *request= [[BTPayPalCheckoutRequest alloc] initWithAmount:options[@"amount"]];
+        BTPayPalCheckoutRequest *request= [[BTPayPalCheckoutRequest alloc] initWithAmount:options[@"amount"]];
         NSString* currency = options[@"currency"];
         if (currency) request.currencyCode = currency;
         NSString* displayName = options[@"displayName"];
