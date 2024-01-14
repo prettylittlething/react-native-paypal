@@ -150,54 +150,50 @@ RCT_EXPORT_METHOD(
             return;
         }
 
-//        BTPayPalDriver *payPalDriver = [[BTPayPalDriver alloc] initWithAPIClient:braintreeClient];
-//
-//        BTPayPalVaultRequest *request = [[BTPayPalVaultRequest alloc] init];//initWithAmount:options[@"billingAgreementDescription"]];
+        BTPayPalDriver *payPalDriver = [[BTPayPalDriver alloc] initWithAPIClient:braintreeClient];
 
-//        NSString* currency = options[@"currency"];
-//        if (currency) request.currencyCode = currency;
-//        NSString* localeCode = options[@"localeCode"];
-//        if (localeCode) request.localeCode = localeCode;
-//
-//        [payPalDriver requestBillingAgreement:request completion:^(BTPayPalAccountNonce * _Nullable tokenizedPayPalAccount, NSError * _Nullable error) {
-//            if (tokenizedPayPalAccount) {
-//                NSDictionary* result = @{
-//                    @"nonce" : (tokenizedPayPalAccount.nonce ?: [NSNull null]),
-//                    @"payerId" : (tokenizedPayPalAccount.payerId ?: [NSNull null]),
-//                    @"email" : (tokenizedPayPalAccount.email ?: [NSNull null]),
-//                    @"firstName" : (tokenizedPayPalAccount.firstName ?: [NSNull null]),
-//                    @"lastName" : (tokenizedPayPalAccount.lastName ?: [NSNull null]),
-//                    @"phone" : (tokenizedPayPalAccount.phone ?: [NSNull null]),
-//                    @"billingAddress": @{
-//                        @"recipientName" : (tokenizedPayPalAccount.billingAddress.recipientName ?: [NSNull null]),
-//                        @"streetAddress" : (tokenizedPayPalAccount.billingAddress.streetAddress ?: [NSNull null]),
-//                        @"extendedAddress" : (tokenizedPayPalAccount.billingAddress.extendedAddress ?: [NSNull null]),
-//                        @"locality" : (tokenizedPayPalAccount.billingAddress.locality ?: [NSNull null]),
-//                        @"countryCodeAlpha2" : (tokenizedPayPalAccount.billingAddress.countryCodeAlpha2 ?: [NSNull null]),
-//                        @"postalCode" : (tokenizedPayPalAccount.billingAddress.postalCode ?: [NSNull null]),
-//                        @"region" : (tokenizedPayPalAccount.billingAddress.region ?: [NSNull null]),
-//                    },
-//                    @"shippingAddress": @{
-//                        @"recipientName" : (tokenizedPayPalAccount.shippingAddress.recipientName ?: [NSNull null]),
-//                        @"streetAddress" : (tokenizedPayPalAccount.shippingAddress.streetAddress ?: [NSNull null]),
-//                        @"extendedAddress" : (tokenizedPayPalAccount.shippingAddress.extendedAddress ?: [NSNull null]),
-//                        @"locality" : (tokenizedPayPalAccount.shippingAddress.locality ?: [NSNull null]),
-//                        @"countryCodeAlpha2" : (tokenizedPayPalAccount.shippingAddress.countryCodeAlpha2 ?: [NSNull null]),
-//                        @"postalCode" : (tokenizedPayPalAccount.shippingAddress.postalCode ?: [NSNull null]),
-//                        @"region" : (tokenizedPayPalAccount.shippingAddress.region ?: [NSNull null]),
-//                    },
-//                };
-//
-//                resolve(result);
-//                return;
-//            } else if (error) {
-//                reject(@"request_billing_agreement_error", @"Error requesting billing agreement", error);
-//                return;
-//            } else {
-//                NSError* e = [NSError errorWithDomain:@"RNPayPal" code:2 userInfo:nil];
-//                reject(@"user_cancellation", @"User cancelled billing agreement request", e);
-//            }
-//        }];
+        BTPayPalVaultRequest *request = [[BTPayPalVaultRequest alloc] init];
+        request.billingAgreementDescription = options[@"billingAgreementDescription"];
+
+        [payPalDriver requestBillingAgreement:request completion:^(BTPayPalAccountNonce * _Nullable tokenizedPayPalAccount, NSError * _Nullable error) {
+            if (tokenizedPayPalAccount) {
+                NSDictionary* result = @{
+                    @"nonce" : (tokenizedPayPalAccount.nonce ?: [NSNull null]),
+                    @"payerId" : (tokenizedPayPalAccount.payerID ?: [NSNull null]),
+                    @"email" : (tokenizedPayPalAccount.email ?: [NSNull null]),
+                    @"firstName" : (tokenizedPayPalAccount.firstName ?: [NSNull null]),
+                    @"lastName" : (tokenizedPayPalAccount.lastName ?: [NSNull null]),
+                    @"phone" : (tokenizedPayPalAccount.phone ?: [NSNull null]),
+                    @"billingAddress": @{
+                        @"recipientName" : (tokenizedPayPalAccount.billingAddress.recipientName ?: [NSNull null]),
+                        @"streetAddress" : (tokenizedPayPalAccount.billingAddress.streetAddress ?: [NSNull null]),
+                        @"extendedAddress" : (tokenizedPayPalAccount.billingAddress.extendedAddress ?: [NSNull null]),
+                        @"locality" : (tokenizedPayPalAccount.billingAddress.locality ?: [NSNull null]),
+                        @"countryCodeAlpha2" : (tokenizedPayPalAccount.billingAddress.countryCodeAlpha2 ?: [NSNull null]),
+                        @"postalCode" : (tokenizedPayPalAccount.billingAddress.postalCode ?: [NSNull null]),
+                        @"region" : (tokenizedPayPalAccount.billingAddress.region ?: [NSNull null]),
+                    },
+                    @"shippingAddress": @{
+                        @"recipientName" : (tokenizedPayPalAccount.shippingAddress.recipientName ?: [NSNull null]),
+                        @"streetAddress" : (tokenizedPayPalAccount.shippingAddress.streetAddress ?: [NSNull null]),
+                        @"extendedAddress" : (tokenizedPayPalAccount.shippingAddress.extendedAddress ?: [NSNull null]),
+                        @"locality" : (tokenizedPayPalAccount.shippingAddress.locality ?: [NSNull null]),
+                        @"countryCodeAlpha2" : (tokenizedPayPalAccount.shippingAddress.countryCodeAlpha2 ?: [NSNull null]),
+                        @"postalCode" : (tokenizedPayPalAccount.shippingAddress.postalCode ?: [NSNull null]),
+                        @"region" : (tokenizedPayPalAccount.shippingAddress.region ?: [NSNull null]),
+                    },
+                };
+
+                resolve(result);
+                return;
+            } else if (error) {
+                reject(@"request_billing_agreement_error", @"Error requesting billing agreement", error);
+                return;
+            } else {
+                NSError* e = [NSError errorWithDomain:@"RNPayPal" code:2 userInfo:nil];
+                reject(@"user_cancellation", @"User cancelled billing agreement request", e);
+            }
+        }];
     });
 }
 
