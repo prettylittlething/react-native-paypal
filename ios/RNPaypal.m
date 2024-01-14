@@ -38,10 +38,8 @@ RCT_EXPORT_METHOD(
         }
 
         BTPayPalDriver *payPalDriver = [[BTPayPalDriver alloc] initWithAPIClient:braintreeClient];
-        payPalDriver.viewControllerPresentingDelegate = self;
-        payPalDriver.appSwitchDelegate = self;
 
-        BTPayPalRequest *request= [[BTPayPalRequest alloc] initWithAmount:options[@"amount"]];
+        BTPayPalCheckoutRequest *request= [[BTPayPalCheckoutRequest alloc] initWithAmount:options[@"amount"]];
         NSString* currency = options[@"currency"];
         if (currency) request.currencyCode = currency;
         NSString* displayName = options[@"displayName"];
@@ -64,7 +62,7 @@ RCT_EXPORT_METHOD(
             if (tokenizedPayPalAccount) {
                 NSDictionary* result = @{
                     @"nonce" : (tokenizedPayPalAccount.nonce ?: [NSNull null]),
-                    @"payerId" : (tokenizedPayPalAccount.payerId ?: [NSNull null]),
+                    @"payerId" : (tokenizedPayPalAccount.payerID ?: [NSNull null]),
                     @"email" : (tokenizedPayPalAccount.email ?: [NSNull null]),
                     @"firstName" : (tokenizedPayPalAccount.firstName ?: [NSNull null]),
                     @"lastName" : (tokenizedPayPalAccount.lastName ?: [NSNull null]),
@@ -115,13 +113,13 @@ RCT_EXPORT_METHOD(
             return;
         }
 
+
         BTDataCollector *dataCollector = [[BTDataCollector alloc] initWithAPIClient:braintreeClient];
-        dataCollector.delegate = self;
-        [dataCollector collectCardFraudData:^(NSString * _Nonnull deviceData) {
-            NSDictionary* result = @{
-                @"deviceData" : deviceData,
-            };
-            resolve(result);
+        [dataCollector collectDeviceData:^(NSString * _Nonnull deviceData) {
+          NSDictionary* result = @{
+            @"deviceData" : deviceData,
+          };
+          resolve(result);
         }];
     });
 }
@@ -134,6 +132,7 @@ RCT_EXPORT_METHOD(
     resolve:(RCTPromiseResolveBlock)resolve
     reject:(RCTPromiseRejectBlock)reject)
 {
+
     dispatch_async(dispatch_get_main_queue(), ^{
         BTAPIClient* braintreeClient = [[BTAPIClient alloc] initWithAuthorization:clientToken];
         if (braintreeClient == nil) {
@@ -149,20 +148,15 @@ RCT_EXPORT_METHOD(
         }
 
         BTPayPalDriver *payPalDriver = [[BTPayPalDriver alloc] initWithAPIClient:braintreeClient];
-        payPalDriver.viewControllerPresentingDelegate = self;
-        payPalDriver.appSwitchDelegate = self;
 
-        BTPayPalRequest *request = [[BTPayPalRequest alloc] initWithAmount:options[@"billingAgreementDescription"]];
-        NSString* currency = options[@"currency"];
-        if (currency) request.currencyCode = currency;
-        NSString* localeCode = options[@"localeCode"];
-        if (localeCode) request.localeCode = localeCode;
+        BTPayPalVaultRequest *request = [[BTPayPalVaultRequest alloc] init];
+        request.billingAgreementDescription = options[@"billingAgreementDescription"];
 
         [payPalDriver requestBillingAgreement:request completion:^(BTPayPalAccountNonce * _Nullable tokenizedPayPalAccount, NSError * _Nullable error) {
             if (tokenizedPayPalAccount) {
                 NSDictionary* result = @{
                     @"nonce" : (tokenizedPayPalAccount.nonce ?: [NSNull null]),
-                    @"payerId" : (tokenizedPayPalAccount.payerId ?: [NSNull null]),
+                    @"payerId" : (tokenizedPayPalAccount.payerID ?: [NSNull null]),
                     @"email" : (tokenizedPayPalAccount.email ?: [NSNull null]),
                     @"firstName" : (tokenizedPayPalAccount.firstName ?: [NSNull null]),
                     @"lastName" : (tokenizedPayPalAccount.lastName ?: [NSNull null]),
@@ -207,7 +201,7 @@ RCT_EXPORT_METHOD(
     annotation:(id)annotation
 {
     if ([url.scheme localizedCaseInsensitiveCompare:URLScheme] == NSOrderedSame) {
-        return [BTAppSwitch handleOpenURL:url sourceApplication:sourceApplication];
+      return [BTAppContextSwitcher handleOpenURL:url];
     }
     return NO;
 }
@@ -217,7 +211,7 @@ RCT_EXPORT_METHOD(
     options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
     if ([url.scheme localizedCaseInsensitiveCompare:URLScheme] == NSOrderedSame) {
-        return [BTAppSwitch handleOpenURL:url options:options];
+      return [BTAppContextSwitcher handleOpenURL:url];
     }
     return NO;
 }
@@ -226,7 +220,8 @@ RCT_EXPORT_METHOD(
     NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     NSString *urlscheme = [NSString stringWithFormat:@"%@.payments", bundleIdentifier];
     URLScheme = urlscheme;
-    [BTAppSwitch setReturnURLScheme:urlscheme];
+
+    [BTAppContextSwitcher setReturnURLScheme:urlscheme];
 }
 
 - (void)paymentDriver:(__unused id)driver requestsPresentationOfViewController:(UIViewController *)viewController {
